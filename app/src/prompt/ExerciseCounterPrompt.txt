@@ -1,0 +1,185 @@
+Title: Build a Daily Exercise Counter Android App (Kotlin + Jetpack Compose)
+
+Role:
+You are an expert Android engineer. Generate a complete, buildable Android Studio project for a Daily Exercise Counter app using Kotlin and Jetpack Compose, following clean architecture and best practices.
+
+Tech and Project Setup:
+- Language: Kotlin
+- UI: Jetpack Compose (Material 3)
+- Min SDK: 24+, Target SDK: latest stable
+- Architecture: MVVM + Use Cases + Repository
+- Dependency Injection: Hilt
+- Data: Room (history, exercises, daily goals), DataStore (settings)
+- Async/State: Kotlin Coroutines + StateFlow
+- Navigation: Navigation Compose (single-activity app)
+- Build: Gradle KTS
+- Testing: JUnit4/5, MockK, Turbine (flows), Compose UI tests
+- Accessibility: Content descriptions, TalkBack labels, large touch targets, color contrast
+
+App Concept:
+A daily exercise counter that lets users:
+- Maintain a list of exercises (start with predefined set)
+- Set daily goals per exercise
+- Track daily progress with add/remove buttons (1x, 5x, 10x up/down arrows)
+- Celebrate when daily goals are achieved with a goblet icon and “Congratulations!”
+- Persist and list past achievements/history
+
+Initial Data:
+- Predefined exercises preloaded on first run:
+  - Pull-up, Push-up, Sit-up, Squat, Kettlebell Swing
+
+Key Features and Requirements:
+
+1) Exercises Management
+- Screen to view list of exercises (name, optional icon).
+- Ability to add custom exercises (name; optional emoji/icon).
+- Ability to edit/rename and archive/delete exercises (soft delete recommended to preserve history integrity).
+- Validation: non-empty names, unique (case-insensitive) within active exercises.
+
+2) Daily Goals
+- Screen to set/edit daily goals.
+- User can select one or more exercises and assign target repetitions for “today.”
+- Validation: goals are non-negative integers; can be zero (implies not targeted today).
+- Show total target for the day and per-exercise goals.
+- Data model should be date-based (LocalDate) using the device’s time zone.
+
+3) Daily Activity Tracking
+- Main screen shows today’s exercises with:
+  - Exercise name
+  - Progress: completed reps / goal (e.g., 25 / 50)
+  - Progress bar or ring indicator
+  - Buttons to adjust reps for the selected exercise:
+    - Increase: up-arrow buttons labeled 1x, 5x, 10x
+    - Decrease: down-arrow buttons labeled 1x, 5x, 10x
+  - Select an exercise row first, then tap the 1x/5x/10x up/down buttons to apply changes to the selected exercise.
+- Prevent counts from going below zero.
+- If no goal set for an exercise, allow counting but show “No goal set” and treat goal as 0 for progress bars.
+- Provide quick actions on each row (optional): mini +1 and -1.
+- Haptics: light tick on increment/decrement, stronger haptic on goal completion.
+- Sounds (optional) with mute toggle in settings.
+
+4) Goal Completion Celebration
+- When an exercise reaches its daily goal:
+  - Show a goblet/trophy icon with a brief “Congratulations!” toast/snackbar/modal.
+  - Visual flair: subtle confetti or scale animation.
+- When all exercises with goals reach completion:
+  - Show a “Daily Goals Complete” celebration.
+
+5) History and Achievements
+- Persist all daily activity snapshots.
+- History screen:
+  - List days with summary: date, total reps, goals vs achieved count.
+  - Tap a day for details: per-exercise totals, goals, and completion status.
+- Store best streaks:
+  - Per-exercise day streak of goal completion.
+  - Overall streak (days where all goals achieved).
+- Allow export of history to JSON (optional).
+
+6) Data and Persistence
+- Room entities:
+  - ExerciseEntity(id, name, isArchived, createdAt)
+  - DailyGoalEntity(id, date, exerciseId, targetReps)
+  - DailyProgressEntity(id, date, exerciseId, completedReps)
+- Ensure a unique constraint per (date, exerciseId) for goals and progress.
+- Migrations and pre-population:
+  - On first run, insert predefined exercises.
+- DataStore for:
+  - Settings (sound/haptics on/off, theme).
+  - Onboarding completed flag.
+- State handling:
+  - Day rollover: at local midnight, automatically create a new day record with zeroed progress and carry forward goals from the previous day (optional but preferred; make this behavior configurable).
+
+7) UI/UX
+- Screens:
+  - Home (Today): selectable list of exercises, progress, adjust buttons (1x/5x/10x up/down), goblet on completion.
+  - Goals: create/update today’s goals; option to copy from yesterday.
+  - Exercises: manage list (add/edit/archive), reorder (optional).
+  - History: list + details.
+  - Settings: sound, haptics, theme, data export/import (optional).
+- Selection pattern:
+  - Selecting a row highlights it; the global add/remove controls apply to the selected row.
+  - If no row is selected and user taps add/remove controls, show a tooltip/toast: “Select an exercise first.”
+- Visual design: Material 3, light/dark themes. Large hit targets for increment/decrement controls. Meaningful icons and labels.
+- Accessibility:
+  - Content descriptions like “Push-up, 20 of 50 completed. Increase by 5.”
+  - Focus order logical; keyboard/D-pad accessible where possible.
+  - Color + text labels on progress indicators.
+
+8) Business Logic
+- Use cases:
+  - GetOrCreateTodayRecords
+  - SetDailyGoalsForExercises
+  - IncrementProgress(exerciseId, delta)
+  - CalculateCompletionStatus
+  - CopyGoalsFromDate
+  - GetHistory(range)
+  - ComputeStreaks
+- Prevent race conditions when rapidly tapping buttons (use atomic updates in a Room transaction).
+- Clamp progress to [0, MAX_INT], and ensure decrement cannot drop below zero.
+
+9) Performance and Reliability
+- Keep today’s state in ViewModel with StateFlow.
+- Use Room Flow/Observable queries for today and history.
+- Handle app going to background/foreground seamlessly.
+- Tests:
+  - Use cases: increment/decrement logic, clamping, completion detection, streaks.
+  - Database: constraints, migrations, pre-population.
+  - UI: selecting an exercise, pressing 1x/5x/10x up/down, goal completion goblet, history listing.
+
+10) Notifications (optional)
+- Daily reminder to set or complete goals.
+- Congratulatory notification at end of day if all goals achieved.
+
+Implementation Details:
+- Selection model in Home VM: selectedExerciseId: Long?
+- Increment/decrement buttons grouped in a bottom action bar:
+  - Increase: up-arrow 1x, 5x, 10x
+  - Decrease: down-arrow 1x, 5x, 10x
+- Prevent accidental long presses from repeating too fast (debounce optional).
+- Use LocalDate and ZoneId.systemDefault() for daily boundaries; centralize date provider for testability.
+- Provide simple illustrations/icons:
+  - Goblet/trophy vector and up/down arrow icons.
+
+Code Organization:
+- app/
+  - build.gradle.kts
+  - MainActivity with NavHost (Home, Goals, Exercises, History, Settings)
+- core/
+  - Domain models: Exercise, DailyGoal, DailyProgress, DailySummary
+  - Use cases as listed above
+- data/
+  - Room database, DAOs, entities, migrations, pre-population
+  - Repositories implementing domain interfaces
+  - DataStore for settings
+- presentation/
+  - ViewModels: HomeViewModel, GoalsViewModel, ExercisesViewModel, HistoryViewModel, SettingsViewModel
+  - UI: Composables for lists, progress bars, selection, increment/decrement controls, dialogs (add/edit exercise, confirm archive), celebration goblet
+  - Immutable UI state models and mappers
+- resources/
+  - Icons (goblet, up/down arrows), strings, themes
+
+Deliverables:
+- Full, compilable Android Studio project with all source.
+- Gradle configured; app launches to Today screen.
+- Predefined exercises loaded on first run.
+- Users can:
+  - Set today’s goals
+  - Select an exercise
+  - Increment/decrement reps via 1x/5x/10x up/down buttons
+  - See goblet and “Congratulations!” on reaching goals
+  - View past achievements/history
+- Tests for core logic and basic UI flows.
+- README with build/run instructions, features, architecture, and screenshots.
+
+Acceptance Criteria:
+- Build succeeds on latest stable Android Studio.
+- First run includes predefined exercises: pull-up, push-up, sit-up, squat, kettlebell swing.
+- Selecting an exercise then pressing 1x/5x/10x up/down correctly updates that exercise only.
+- Counts never go below zero.
+- Goblet and “Congratulations!” shown when a goal is reached; daily all-goals completion also celebrated.
+- History persists across app restarts and shows past days.
+
+Output Format:
+- Provide the project file tree.
+- For each file, include the full source code in separate code blocks with correct language tags (kotlin, gradle, xml as needed).
+- Include instructions to run (Android Studio version, Gradle tasks) and how to use the app.
