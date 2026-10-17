@@ -12,7 +12,8 @@ import com.trainig.workouttracker.presentation.settings.SettingsScreen
 
 @Composable
 fun WorkoutNavGraph(
-    navController: NavHostController
+    navController: NavHostController,
+    onOpenDrawer: () -> Unit
 ) {
     NavHost(
         navController = navController,
@@ -20,7 +21,8 @@ fun WorkoutNavGraph(
     ) {
         composable(Screen.Home.route) {
             HomeScreen(
-                onNavigateToGoals = { navController.navigate(Screen.Goals.route) }
+                onNavigateToGoals = { navController.navigate(Screen.Goals.route) },
+                onOpenDrawer = onOpenDrawer
             )
         }
 

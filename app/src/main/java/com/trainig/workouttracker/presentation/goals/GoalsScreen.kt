@@ -10,12 +10,18 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.trainig.workouttracker.core.domain.model.Exercise
+import com.trainig.workouttracker.presentation.components.EmptyState
+import com.trainig.workouttracker.presentation.components.ExerciseAvatar
+import com.trainig.workouttracker.presentation.components.GradientTopAppBar
+import com.trainig.workouttracker.ui.theme.exerciseAccent
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun GoalsScreen(
     onNavigateBack: () -> Unit,
@@ -34,15 +40,18 @@ fun GoalsScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Set Daily Goals") },
+            GradientTopAppBar(
+                title = "Set Daily Goals",
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
-                    TextButton(onClick = { viewModel.saveGoals() }) {
+                    TextButton(
+                        onClick = { viewModel.saveGoals() },
+                        colors = ButtonDefaults.textButtonColors(contentColor = Color.White)
+                    ) {
                         Text("Save")
                     }
                 }
@@ -58,12 +67,29 @@ fun GoalsScreen(
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             item {
-                Text(
-                    text = "Set your target repetitions for each exercise today:",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 8.dp),
+                    shape = MaterialTheme.shapes.large,
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier.padding(16.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(text = "🎯", style = MaterialTheme.typography.headlineMedium)
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Text(
+                            text = "Set your target repetitions for each exercise today:",
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                }
             }
 
             items(exercises, key = { it.id }) { exercise ->
@@ -77,16 +103,10 @@ fun GoalsScreen(
             if (exercises.isEmpty()) {
                 item {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(32.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = "No exercises available.\nAdd exercises first!",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        EmptyState(message = "No exercises available.\nAdd exercises first!")
                     }
                 }
             }
@@ -100,8 +120,13 @@ fun GoalInputCard(
     currentValue: Int,
     onValueChange: (Int) -> Unit
 ) {
+    val accent = exerciseAccent(exercise.id)
+
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier
@@ -110,6 +135,10 @@ fun GoalInputCard(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            ExerciseAvatar(name = exercise.name, color = accent)
+
+            Spacer(modifier = Modifier.width(12.dp))
+
             Text(
                 text = exercise.name,
                 style = MaterialTheme.typography.titleMedium,
@@ -120,10 +149,14 @@ fun GoalInputCard(
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(
-                    onClick = { onValueChange((currentValue - 5).coerceAtLeast(0)) }
+                FilledTonalIconButton(
+                    onClick = { onValueChange((currentValue - 5).coerceAtLeast(0)) },
+                    colors = IconButtonDefaults.filledTonalIconButtonColors(
+                        containerColor = accent.copy(alpha = 0.15f),
+                        contentColor = accent
+                    )
                 ) {
-                    Text("-5")
+                    Text("-5", fontWeight = FontWeight.Bold)
                 }
 
                 OutlinedTextField(
@@ -133,16 +166,27 @@ fun GoalInputCard(
                             onValueChange(value.coerceAtLeast(0))
                         }
                     },
-                    modifier = Modifier.width(80.dp),
+                    modifier = Modifier.width(72.dp),
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
                     singleLine = true,
-                    textStyle = MaterialTheme.typography.bodyLarge
+                    textStyle = MaterialTheme.typography.bodyLarge.copy(
+                        textAlign = TextAlign.Center,
+                        fontWeight = FontWeight.Bold
+                    ),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedBorderColor = accent,
+                        cursorColor = accent
+                    )
                 )
 
-                IconButton(
-                    onClick = { onValueChange(currentValue + 5) }
+                FilledIconButton(
+                    onClick = { onValueChange(currentValue + 5) },
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = accent,
+                        contentColor = Color.White
+                    )
                 ) {
-                    Text("+5")
+                    Text("+5", fontWeight = FontWeight.Bold)
                 }
             }
         }

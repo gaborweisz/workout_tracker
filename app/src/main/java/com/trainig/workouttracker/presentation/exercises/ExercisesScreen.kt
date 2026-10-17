@@ -10,11 +10,15 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.trainig.workouttracker.core.domain.model.Exercise
+import com.trainig.workouttracker.presentation.components.EmptyState
+import com.trainig.workouttracker.presentation.components.ExerciseAvatar
+import com.trainig.workouttracker.presentation.components.GradientTopAppBar
+import com.trainig.workouttracker.ui.theme.exerciseAccent
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ExercisesScreen(
     onNavigateBack: () -> Unit,
@@ -41,8 +45,8 @@ fun ExercisesScreen(
 
     Scaffold(
         topBar = {
-            TopAppBar(
-                title = { Text("Manage Exercises") },
+            GradientTopAppBar(
+                title = "Manage Exercises",
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "Back")
@@ -51,9 +55,13 @@ fun ExercisesScreen(
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { showAddDialog = true }) {
-                Icon(Icons.Default.Add, contentDescription = "Add Exercise")
-            }
+            ExtendedFloatingActionButton(
+                onClick = { showAddDialog = true },
+                containerColor = MaterialTheme.colorScheme.secondary,
+                contentColor = MaterialTheme.colorScheme.onSecondary,
+                icon = { Icon(Icons.Default.Add, contentDescription = null) },
+                text = { Text("Add Exercise") }
+            )
         },
         snackbarHost = { SnackbarHost(snackbarHostState) }
     ) { paddingValues ->
@@ -75,16 +83,10 @@ fun ExercisesScreen(
             if (exercises.isEmpty()) {
                 item {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(32.dp),
+                        modifier = Modifier.fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = "No exercises yet.\nTap + to add one!",
-                            style = MaterialTheme.typography.bodyLarge,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+                        EmptyState(message = "No exercises yet.\nTap + to add one!")
                     }
                 }
             }
@@ -145,8 +147,13 @@ fun ExerciseListItem(
     onEdit: () -> Unit,
     onArchive: () -> Unit
 ) {
+    val accent = exerciseAccent(exercise.id)
+
     Card(
-        modifier = Modifier.fillMaxWidth()
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
     ) {
         Row(
             modifier = Modifier
@@ -155,6 +162,10 @@ fun ExerciseListItem(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
+            ExerciseAvatar(name = exercise.name, color = accent, size = 44.dp)
+
+            Spacer(modifier = Modifier.width(16.dp))
+
             Text(
                 text = exercise.name,
                 style = MaterialTheme.typography.titleMedium,
@@ -163,10 +174,10 @@ fun ExerciseListItem(
 
             Row(horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                 IconButton(onClick = onEdit) {
-                    Icon(Icons.Default.Edit, contentDescription = "Edit")
+                    Icon(Icons.Default.Edit, contentDescription = "Edit", tint = accent)
                 }
                 IconButton(onClick = onArchive) {
-                    Icon(Icons.Default.Delete, contentDescription = "Archive")
+                    Icon(Icons.Default.Delete, contentDescription = "Archive", tint = Color(0xFFEF4444))
                 }
             }
         }
