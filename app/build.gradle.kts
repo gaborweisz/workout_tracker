@@ -45,6 +45,17 @@ android {
     buildFeatures {
         compose = true
     }
+    packaging {
+        resources {
+            // Duplicate license/notice files from the Anthropic SDK's transitive dependencies
+            excludes += setOf(
+                "META-INF/DEPENDENCIES",
+                "META-INF/LICENSE*",
+                "META-INF/NOTICE*",
+                "META-INF/INDEX.LIST"
+            )
+        }
+    }
 }
 
 dependencies {
@@ -83,6 +94,9 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.core)
     implementation(libs.kotlinx.coroutines.android)
+
+    // Claude API (AI workout plan suggestions)
+    implementation(libs.anthropic.java)
 
     // Desugaring for Java 8+ APIs on older Android versions
     coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.3")

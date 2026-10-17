@@ -29,6 +29,7 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.trainig.workouttracker.ui.theme.BrandGradient
@@ -47,7 +48,7 @@ fun GradientTopAppBar(
             .background(Brush.horizontalGradient(BrandGradient))
     ) {
         TopAppBar(
-            title = { Text(title, fontWeight = FontWeight.Bold) },
+            title = { Text(title, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis) },
             navigationIcon = navigationIcon,
             actions = actions,
             colors = TopAppBarDefaults.topAppBarColors(

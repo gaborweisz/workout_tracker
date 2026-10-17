@@ -29,6 +29,19 @@ class SettingsViewModel @Inject constructor(
             initialValue = true
         )
 
+    val anthropicApiKey: StateFlow<String> = settingsRepository.anthropicApiKey
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = ""
+        )
+
+    fun saveApiKey(key: String) {
+        viewModelScope.launch {
+            settingsRepository.setAnthropicApiKey(key)
+        }
+    }
+
     fun toggleSound(enabled: Boolean) {
         viewModelScope.launch {
             settingsRepository.setSoundEnabled(enabled)

@@ -53,6 +53,7 @@ fun WorkoutTrackerApp() {
 
     val navigationItems = listOf(
         NavigationItem("Today", Screen.Home.route, Icons.Default.Home),
+        NavigationItem("Gym Plans", Screen.Plans.route, Icons.Default.PlayArrow),
         NavigationItem("Goals", Screen.Goals.route, Icons.Default.Edit),
         NavigationItem("Exercises", Screen.Exercises.route, Icons.Default.List),
         NavigationItem("History", Screen.History.route, Icons.Default.DateRange),

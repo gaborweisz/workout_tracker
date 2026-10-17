@@ -30,5 +30,11 @@ object DatabaseModule {
 
     @Provides
     fun provideDailyProgressDao(database: WorkoutDatabase) = database.dailyProgressDao()
+
+    @Provides
+    fun provideWorkoutPlanDao(database: WorkoutDatabase) = database.workoutPlanDao()
+
+    @Provides
+    fun provideWorkoutSessionDao(database: WorkoutDatabase) = database.workoutSessionDao()
 }
 
