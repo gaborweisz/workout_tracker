@@ -18,7 +18,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.trainig.workouttracker.core.domain.model.PlanExercise
 import com.trainig.workouttracker.core.domain.plan.ExerciseLibrary
-import com.trainig.workouttracker.presentation.components.ExerciseAvatar
+import com.trainig.workouttracker.presentation.components.ExerciseIcon
 import com.trainig.workouttracker.presentation.components.GradientTopAppBar
 import com.trainig.workouttracker.presentation.components.NumberInputDialog
 import com.trainig.workouttracker.presentation.components.NumberStepper
@@ -200,7 +200,7 @@ private fun EditableExerciseCard(
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                ExerciseAvatar(name = "${index + 1}", color = accent, size = 36.dp)
+                ExerciseIcon(name = exercise.name, color = accent, size = 36.dp)
                 Spacer(modifier = Modifier.width(8.dp))
                 OutlinedTextField(
                     value = exercise.name,

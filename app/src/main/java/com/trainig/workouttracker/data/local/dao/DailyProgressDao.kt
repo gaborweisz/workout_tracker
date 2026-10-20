@@ -36,6 +36,13 @@ interface DailyProgressDao {
         }
     }
 
+    // Dates are ISO strings, so BETWEEN compares them in calendar order
+    @Query("SELECT * FROM daily_progress WHERE date BETWEEN :start AND :end")
+    suspend fun getProgressBetween(start: String, end: String): List<DailyProgressEntity>
+
+    @Query("SELECT DISTINCT date FROM daily_progress WHERE completedReps > 0 ORDER BY date DESC")
+    suspend fun getActiveDates(): List<String>
+
     @Query("SELECT DISTINCT date FROM daily_progress ORDER BY date DESC")
     suspend fun getAllDatesWithProgress(): List<String>
 }

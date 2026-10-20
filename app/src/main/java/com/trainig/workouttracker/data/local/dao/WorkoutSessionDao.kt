@@ -17,6 +17,10 @@ abstract class WorkoutSessionDao {
     abstract fun getRecentSessions(limit: Int): Flow<List<SessionWithSets>>
 
     @Transaction
+    @Query("SELECT * FROM workout_sessions WHERE finishedAt IS NOT NULL ORDER BY startedAt ASC")
+    abstract fun getFinishedSessions(): Flow<List<SessionWithSets>>
+
+    @Transaction
     @Query("SELECT * FROM workout_sessions WHERE id = :id")
     abstract fun observeSession(id: Long): Flow<SessionWithSets?>
 

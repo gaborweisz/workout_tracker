@@ -9,6 +9,7 @@ interface DailyGoalRepository {
     suspend fun getGoalForExercise(date: LocalDate, exerciseId: Long): DailyGoal?
     suspend fun setGoal(goal: DailyGoal)
     suspend fun setGoals(goals: List<DailyGoal>)
+    suspend fun getGoalsBetween(start: LocalDate, end: LocalDate): List<DailyGoal>
     suspend fun deleteGoalsForDate(date: LocalDate)
 }
 

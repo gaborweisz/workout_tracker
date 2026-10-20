@@ -34,7 +34,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.trainig.workouttracker.core.domain.model.SessionSet
 import com.trainig.workouttracker.core.domain.model.WorkoutSession
 import com.trainig.workouttracker.presentation.components.CelebrationDialog
-import com.trainig.workouttracker.presentation.components.ExerciseAvatar
+import com.trainig.workouttracker.presentation.components.ExerciseIcon
 import com.trainig.workouttracker.presentation.components.GradientTopAppBar
 import com.trainig.workouttracker.presentation.components.NumberInputDialog
 import com.trainig.workouttracker.presentation.components.NumberStepper
@@ -279,7 +279,7 @@ private fun ExerciseSetsCard(
     ) {
         Column(modifier = Modifier.padding(12.dp)) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                ExerciseAvatar(name = first.exerciseName, color = accent)
+                ExerciseIcon(name = first.exerciseName, color = accent)
                 Spacer(modifier = Modifier.width(12.dp))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(first.exerciseName, style = MaterialTheme.typography.titleMedium)

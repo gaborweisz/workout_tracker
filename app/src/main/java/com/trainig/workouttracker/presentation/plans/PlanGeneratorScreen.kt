@@ -21,7 +21,7 @@ import com.trainig.workouttracker.core.domain.model.ExperienceLevel
 import com.trainig.workouttracker.core.domain.model.PlanExercise
 import com.trainig.workouttracker.core.domain.model.TrainingGoal
 import com.trainig.workouttracker.core.domain.model.WorkoutFocus
-import com.trainig.workouttracker.presentation.components.ExerciseAvatar
+import com.trainig.workouttracker.presentation.components.ExerciseIcon
 import com.trainig.workouttracker.presentation.components.GradientButton
 import com.trainig.workouttracker.presentation.components.GradientTopAppBar
 import com.trainig.workouttracker.presentation.components.formatRest
@@ -255,7 +255,7 @@ private fun SuggestedExerciseRow(index: Int, exercise: PlanExercise) {
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
-            ExerciseAvatar(name = exercise.name, color = accent)
+            ExerciseIcon(name = exercise.name, color = accent)
             Spacer(modifier = Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(exercise.name, style = MaterialTheme.typography.titleMedium)

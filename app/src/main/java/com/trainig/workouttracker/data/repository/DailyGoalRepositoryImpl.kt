@@ -30,6 +30,9 @@ class DailyGoalRepositoryImpl @Inject constructor(
         dailyGoalDao.insertGoals(goals.map { it.toEntity() })
     }
 
+    override suspend fun getGoalsBetween(start: LocalDate, end: LocalDate): List<DailyGoal> =
+        dailyGoalDao.getGoalsBetween(start.toString(), end.toString()).map { it.toDomain() }
+
     override suspend fun deleteGoalsForDate(date: LocalDate) {
         dailyGoalDao.deleteGoalsForDate(date.toString())
     }

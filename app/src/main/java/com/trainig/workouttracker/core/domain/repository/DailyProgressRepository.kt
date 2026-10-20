@@ -10,5 +10,9 @@ interface DailyProgressRepository {
     suspend fun updateProgress(progress: DailyProgress)
     suspend fun incrementProgress(date: LocalDate, exerciseId: Long, delta: Int)
     suspend fun getAllDatesWithProgress(): List<LocalDate>
+    suspend fun getProgressBetween(start: LocalDate, end: LocalDate): List<DailyProgress>
+
+    /** Dates with at least one rep logged, newest first. */
+    suspend fun getActiveDates(): List<LocalDate>
 }
 

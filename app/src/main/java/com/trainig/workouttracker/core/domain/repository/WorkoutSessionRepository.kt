@@ -9,6 +9,9 @@ interface WorkoutSessionRepository {
     /** The unfinished session, if a workout is in progress. */
     fun getActiveSession(): Flow<WorkoutSession?>
     fun getRecentSessions(limit: Int = 20): Flow<List<WorkoutSession>>
+
+    /** Every finished session, oldest first. */
+    fun getFinishedSessions(): Flow<List<WorkoutSession>>
     fun observeSession(id: Long): Flow<WorkoutSession?>
 
     /** Creates a session with one row per planned set. Returns the session id. */

@@ -21,6 +21,9 @@ interface DailyGoalDao {
     @Update
     suspend fun updateGoal(goal: DailyGoalEntity)
 
+    @Query("SELECT * FROM daily_goals WHERE date BETWEEN :start AND :end")
+    suspend fun getGoalsBetween(start: String, end: String): List<DailyGoalEntity>
+
     @Query("DELETE FROM daily_goals WHERE date = :date")
     suspend fun deleteGoalsForDate(date: String)
 }

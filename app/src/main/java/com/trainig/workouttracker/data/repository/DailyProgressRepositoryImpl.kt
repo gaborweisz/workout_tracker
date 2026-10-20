@@ -32,5 +32,11 @@ class DailyProgressRepositoryImpl @Inject constructor(
 
     override suspend fun getAllDatesWithProgress(): List<LocalDate> =
         dailyProgressDao.getAllDatesWithProgress().map { LocalDate.parse(it) }
+
+    override suspend fun getProgressBetween(start: LocalDate, end: LocalDate): List<DailyProgress> =
+        dailyProgressDao.getProgressBetween(start.toString(), end.toString()).map { it.toDomain() }
+
+    override suspend fun getActiveDates(): List<LocalDate> =
+        dailyProgressDao.getActiveDates().map { LocalDate.parse(it) }
 }
 

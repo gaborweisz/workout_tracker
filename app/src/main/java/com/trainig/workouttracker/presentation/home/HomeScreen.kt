@@ -28,7 +28,7 @@ import com.trainig.workouttracker.core.domain.model.TodayExerciseItem
 import com.trainig.workouttracker.presentation.components.AccentProgressBar
 import com.trainig.workouttracker.presentation.components.CelebrationDialog
 import com.trainig.workouttracker.presentation.components.EmptyState
-import com.trainig.workouttracker.presentation.components.ExerciseAvatar
+import com.trainig.workouttracker.presentation.components.ExerciseIcon
 import com.trainig.workouttracker.presentation.components.GradientButton
 import com.trainig.workouttracker.presentation.components.GradientTopAppBar
 import com.trainig.workouttracker.presentation.components.ProgressRing
@@ -276,7 +276,7 @@ fun ExerciseCard(
                     colors = listOf(accent, lerp(accent, Color.White, 0.4f)),
                     trackColor = accent.copy(alpha = 0.15f)
                 ) {
-                    ExerciseAvatar(name = item.exercise.name, color = accent)
+                    ExerciseIcon(name = item.exercise.name, color = accent)
                 }
 
                 Spacer(modifier = Modifier.width(16.dp))

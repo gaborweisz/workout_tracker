@@ -23,6 +23,9 @@ class WorkoutSessionRepositoryImpl @Inject constructor(
     override fun getRecentSessions(limit: Int): Flow<List<WorkoutSession>> =
         workoutSessionDao.getRecentSessions(limit).map { sessions -> sessions.map { it.toDomain() } }
 
+    override fun getFinishedSessions(): Flow<List<WorkoutSession>> =
+        workoutSessionDao.getFinishedSessions().map { sessions -> sessions.map { it.toDomain() } }
+
     override fun observeSession(id: Long): Flow<WorkoutSession?> =
         workoutSessionDao.observeSession(id).map { it?.toDomain() }
 

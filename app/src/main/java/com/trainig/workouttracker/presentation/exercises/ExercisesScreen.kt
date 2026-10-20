@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.trainig.workouttracker.core.domain.model.Exercise
 import com.trainig.workouttracker.presentation.components.EmptyState
-import com.trainig.workouttracker.presentation.components.ExerciseAvatar
+import com.trainig.workouttracker.presentation.components.ExerciseIcon
 import com.trainig.workouttracker.presentation.components.GradientTopAppBar
 import com.trainig.workouttracker.ui.theme.exerciseAccent
 
@@ -162,7 +162,7 @@ fun ExerciseListItem(
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            ExerciseAvatar(name = exercise.name, color = accent, size = 44.dp)
+            ExerciseIcon(name = exercise.name, color = accent, size = 44.dp)
 
             Spacer(modifier = Modifier.width(16.dp))
 

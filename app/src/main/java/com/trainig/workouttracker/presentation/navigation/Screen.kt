@@ -8,6 +8,7 @@ sealed class Screen(val route: String) {
     data object Settings : Screen("settings")
     data object Plans : Screen("plans")
     data object PlanGenerator : Screen("plan_generator")
+    data object WorkoutStats : Screen("workout_stats")
 
     data object PlanEditor : Screen("plan_editor/{planId}") {
         const val ARG_PLAN_ID = "planId"

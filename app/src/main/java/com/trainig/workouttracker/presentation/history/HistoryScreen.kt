@@ -21,13 +21,23 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.trainig.workouttracker.core.domain.model.DailySummary
+import com.trainig.workouttracker.core.domain.model.ProgressStats
 import com.trainig.workouttracker.presentation.components.AccentProgressBar
+import com.trainig.workouttracker.presentation.components.BarChart
+import com.trainig.workouttracker.presentation.components.ChartEntry
+import com.trainig.workouttracker.presentation.components.ChartLegend
 import com.trainig.workouttracker.presentation.components.EmptyState
-import com.trainig.workouttracker.presentation.components.ExerciseAvatar
+import com.trainig.workouttracker.presentation.components.ExerciseIcon
+import com.trainig.workouttracker.presentation.components.FilterChipRow
 import com.trainig.workouttracker.presentation.components.GradientTopAppBar
+import com.trainig.workouttracker.presentation.components.StatTile
 import com.trainig.workouttracker.ui.theme.BrandGradient
 import com.trainig.workouttracker.ui.theme.ExerciseAccents
+import com.trainig.workouttracker.ui.theme.Gold
+import com.trainig.workouttracker.ui.theme.Orange
+import com.trainig.workouttracker.ui.theme.Violet
 import com.trainig.workouttracker.ui.theme.exerciseAccent
+import java.text.NumberFormat
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -38,6 +48,9 @@ fun HistoryScreen(
 ) {
     val historyDates by viewModel.historyDates.collectAsState()
     val selectedDateSummary by viewModel.selectedDateSummary.collectAsState()
+    val stats by viewModel.stats.collectAsState()
+    val statsRange by viewModel.statsRange.collectAsState()
+    val statsExerciseId by viewModel.statsExerciseId.collectAsState()
 
     Scaffold(
         topBar = {
@@ -68,6 +81,28 @@ fun HistoryScreen(
                 contentPadding = PaddingValues(16.dp),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                // Always present, so stats loading after the dates can't push the scroll anchor down
+                item(key = "stats") {
+                    stats?.let { progress ->
+                        ProgressStatsSection(
+                            stats = progress,
+                            range = statsRange,
+                            exerciseId = statsExerciseId,
+                            onRangeChange = viewModel::setStatsRange,
+                            onExerciseChange = viewModel::setStatsExercise
+                        )
+                    }
+                }
+
+                item(key = "daysHeader") {
+                    Text(
+                        text = "Days",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.padding(top = 8.dp)
+                    )
+                }
+
                 items(historyDates, key = { it.toString() }) { date ->
                     HistoryDateCard(
                         date = date,
@@ -83,6 +118,107 @@ fun HistoryScreen(
             summary = summary,
             onDismiss = { viewModel.clearSelectedDate() }
         )
+    }
+}
+
+@Composable
+private fun ProgressStatsSection(
+    stats: ProgressStats,
+    range: HistoryViewModel.StatsRange,
+    exerciseId: Long?,
+    onRangeChange: (HistoryViewModel.StatsRange) -> Unit,
+    onExerciseChange: (Long?) -> Unit
+) {
+    val exercise = stats.exercises.firstOrNull { it.id == exerciseId }
+    val barColor = exercise?.let { exerciseAccent(it.id) } ?: MaterialTheme.colorScheme.primary
+    val labelFormat = remember(range) {
+        DateTimeFormatter.ofPattern(if (range == HistoryViewModel.StatsRange.WEEK) "EEE" else "MMM d")
+    }
+    val detailFormat = remember { DateTimeFormatter.ofPattern("EEE, MMM d") }
+
+    val entries = remember(stats, exerciseId, barColor) {
+        stats.days.map { day ->
+            val reps = day.reps(exerciseId)
+            val goalMet = day.goalMet(exerciseId)
+            ChartEntry(
+                label = day.date.format(labelFormat),
+                value = reps.toFloat(),
+                color = barColor,
+                detail = "${day.date.format(detailFormat)} · $reps reps" + if (goalMet) " · 🏆 goal met" else "",
+                marked = goalMet
+            )
+        }
+    }
+    val totalReps = stats.days.sumOf { it.reps(exerciseId) }
+    val activeDays = stats.days.count { it.reps(exerciseId) > 0 }
+    val goalDays = stats.days.count { it.goalMet(exerciseId) }
+    val bestDay = stats.days.maxOfOrNull { it.reps(exerciseId) } ?: 0
+
+    Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+        FilterChipRow(
+            options = HistoryViewModel.StatsRange.entries,
+            selected = range,
+            label = { it.label },
+            onSelect = onRangeChange
+        )
+
+        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            StatTile(
+                label = "Day streak",
+                value = "${stats.streakDays}",
+                emoji = "🔥",
+                accent = Orange,
+                modifier = Modifier.weight(1f)
+            )
+            StatTile(
+                label = "Total reps",
+                value = NumberFormat.getIntegerInstance().format(totalReps),
+                emoji = "💪",
+                accent = Violet,
+                modifier = Modifier.weight(1f)
+            )
+            StatTile(
+                label = "Goal days",
+                value = "$goalDays",
+                emoji = "🏆",
+                accent = Gold,
+                modifier = Modifier.weight(1f)
+            )
+        }
+
+        Card(
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.large,
+            colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+            elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+        ) {
+            Column(modifier = Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                Text(
+                    text = "Reps per day" + (exercise?.let { " · ${it.name}" } ?: ""),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold
+                )
+                if (stats.exercises.size > 1) {
+                    FilterChipRow(
+                        options = listOf<Long?>(null) + stats.exercises.map { it.id },
+                        selected = exerciseId,
+                        label = { id -> stats.exercises.firstOrNull { it.id == id }?.name ?: "All" },
+                        onSelect = onExerciseChange
+                    )
+                }
+                BarChart(
+                    entries = entries,
+                    summary = if (activeDays == 0) {
+                        "Nothing logged in the last ${range.days} days"
+                    } else {
+                        "Active $activeDays of ${range.days} days · best $bestDay reps"
+                    }
+                )
+                if (goalDays > 0) {
+                    ChartLegend(items = listOf(barColor to "Reps", Gold to "Goal met"))
+                }
+            }
+        }
     }
 }
 
@@ -238,7 +374,7 @@ fun HistoryDetailDialog(
                                 horizontalArrangement = Arrangement.SpaceBetween,
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                ExerciseAvatar(name = detail.exerciseName, color = accent, size = 36.dp)
+                                ExerciseIcon(name = detail.exerciseName, color = accent, size = 36.dp)
                                 Spacer(modifier = Modifier.width(12.dp))
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(

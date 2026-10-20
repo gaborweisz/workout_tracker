@@ -14,6 +14,7 @@ import com.trainig.workouttracker.presentation.plans.PlanEditorScreen
 import com.trainig.workouttracker.presentation.plans.PlanGeneratorScreen
 import com.trainig.workouttracker.presentation.plans.PlansScreen
 import com.trainig.workouttracker.presentation.settings.SettingsScreen
+import com.trainig.workouttracker.presentation.stats.WorkoutStatsScreen
 import com.trainig.workouttracker.presentation.workout.WorkoutScreen
 
 @Composable
@@ -61,7 +62,14 @@ fun WorkoutNavGraph(
                 onNavigateBack = { navController.popBackStack() },
                 onSuggestPlan = { navController.navigate(Screen.PlanGenerator.route) },
                 onEditPlan = { planId -> navController.navigate(Screen.PlanEditor.createRoute(planId)) },
-                onOpenWorkout = { sessionId -> navController.navigate(Screen.Workout.createRoute(sessionId)) }
+                onOpenWorkout = { sessionId -> navController.navigate(Screen.Workout.createRoute(sessionId)) },
+                onOpenStats = { navController.navigate(Screen.WorkoutStats.route) }
+            )
+        }
+
+        composable(Screen.WorkoutStats.route) {
+            WorkoutStatsScreen(
+                onNavigateBack = { navController.popBackStack() }
             )
         }
 

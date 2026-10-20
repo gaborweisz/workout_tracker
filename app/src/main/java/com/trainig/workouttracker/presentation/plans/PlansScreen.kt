@@ -1,5 +1,6 @@
 package com.trainig.workouttracker.presentation.plans
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -8,12 +9,16 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -42,6 +47,7 @@ fun PlansScreen(
     onSuggestPlan: () -> Unit,
     onEditPlan: (Long) -> Unit,
     onOpenWorkout: (Long) -> Unit,
+    onOpenStats: () -> Unit,
     viewModel: PlansViewModel = hiltViewModel()
 ) {
     val plans by viewModel.plans.collectAsState()
@@ -96,6 +102,9 @@ fun PlansScreen(
                         ActiveWorkoutBanner(session = session, onResume = { onOpenWorkout(session.id) })
                     }
                     SuggestPlanCard(onClick = onSuggestPlan)
+                    if (recentSessions.isNotEmpty()) {
+                        StatsCard(sessions = recentSessions, onClick = onOpenStats)
+                    }
                 }
             }
 
@@ -224,6 +233,60 @@ private fun SuggestPlanCard(onClick: () -> Unit) {
                 "Tell us your goal and time; get a plan you can tweak",
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.White.copy(alpha = 0.9f)
+            )
+        }
+    }
+}
+
+/** Entry point to Workout Stats, with a tiny volume sparkline of the latest workouts. */
+@Composable
+private fun StatsCard(sessions: List<WorkoutSession>, onClick: () -> Unit) {
+    val barColor = MaterialTheme.colorScheme.primary
+    // recentSessions is newest first; the sparkline reads left to right in time
+    val volumes = sessions.take(8).reversed().map { it.volumeKg.toFloat() }
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(MaterialTheme.shapes.large)
+            .clickable(onClick = onClick),
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
+    ) {
+        Row(modifier = Modifier.padding(16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text(text = "📈", style = MaterialTheme.typography.headlineMedium)
+            Spacer(modifier = Modifier.width(16.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text("Workout stats", style = MaterialTheme.typography.titleMedium)
+                Text(
+                    "Volume, progress & personal records",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            Canvas(
+                modifier = Modifier
+                    .width(56.dp)
+                    .height(28.dp)
+            ) {
+                val max = volumes.maxOrNull()?.takeIf { it > 0f } ?: return@Canvas
+                val slot = size.width / volumes.size
+                val barWidth = slot - 2.dp.toPx()
+                volumes.forEachIndexed { i, volume ->
+                    val h = (size.height * volume / max).coerceAtLeast(2.dp.toPx())
+                    drawRoundRect(
+                        color = barColor,
+                        topLeft = Offset(slot * i + 1.dp.toPx(), size.height - h),
+                        size = Size(barWidth, h),
+                        cornerRadius = CornerRadius(2.dp.toPx())
+                    )
+                }
+            }
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }
